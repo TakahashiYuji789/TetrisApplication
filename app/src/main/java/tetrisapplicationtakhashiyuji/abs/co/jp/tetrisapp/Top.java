@@ -19,7 +19,7 @@ import android.view.SurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class Top extends Activity {
+public class Top extends AppCompatActivity {
     private class FieldView extends SurfaceView {
 
         Random mRand = new Random(System.currentTimeMillis());
@@ -64,7 +64,7 @@ public class Top extends Activity {
 
         int[][] block = blocks[mRand.nextInt(blocks.length)];
         int posx, posy;
-        int mapWidth  = 10*2+1;
+        int mapWidth  = 10*2+4;
         int mapHeight = 15*2+4;
         int[][] map = new int[mapHeight][];
 
@@ -96,8 +96,8 @@ public class Top extends Activity {
             for (int y = 0; y < h; y ++) {
                 for (int x = 0; x < w; x ++) {
                     if (matrix[y][x] != 0) {
-                        int px = (x + offsetx) * 50;
-                        int py = (y + offsety) * 50;
+                        int px = (x + offsetx) * 45;
+                        int py = (y + offsety) * 45;
                         rect.setBounds(px, py, px + 40, py + 40);
                         rect.draw(canvas);
                     }
@@ -283,6 +283,7 @@ public class Top extends Activity {
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        setContentView(R.layout.activity_top);
     }
 
     @Override
