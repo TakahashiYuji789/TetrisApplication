@@ -13,17 +13,27 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
 public class Top extends AppCompatActivity {
-    private class FieldView extends SurfaceView {
+    FieldView mainSurfaceView;
+    private SurfaceView surfaceView;
+
+    private class FieldView extends SurfaceView  {
 
         Random mRand = new Random(System.currentTimeMillis());
-
+        View flickView = getWindow().getDecorView(); // Activity画面
+        float adjustX = 150.0f;
+        float adjustY = 150.0f;
         int[][][] blocks = {
                 {
                         {1,1},
@@ -62,20 +72,56 @@ public class Top extends AppCompatActivity {
                 }
         };
 
+        private static final int SWIPE_MIN_DISTANCE = 120;
+        private static final int SWIPE_MAX_OFF_PATH = 250;
+        private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
+        private GestureDetector mGestureDetector;
+
         int[][] block = blocks[mRand.nextInt(blocks.length)];
         int posx, posy;
-        int mapWidth  = 10*2+4;
-        int mapHeight = 15*2+4;
+        int mapWidth  = 10*2+3;
+        int mapHeight = 15*2+1;
         int[][] map = new int[mapHeight][];
-
 
         public FieldView(Context context) {
             super(context);
-
             setBackgroundColor(0xFFFFFFFF);
             setFocusable(true);
             setFocusableInTouchMode(true);
             requestFocus();
+            new FlickCheck(flickView, adjustX, adjustY) {
+
+                @Override
+                public void getFlick(int flickData) {
+                    switch (flickData) {
+                        case FlickCheck.LEFT_FLICK:
+                            if (check(block, posx - 1, posy)) {
+                                posx = posx - 1;
+                            }
+                            break;
+
+                        case FlickCheck.RIGHT_FLICK:
+                            if (check(block, posx + 1, posy)) {
+                                posx = posx + 1;
+                            }
+                            break;
+
+                        case FlickCheck.UP_FLICK:
+                            int[][] newBlock = rotate(block);
+                            if (check(newBlock, posx, posy)) {
+                                block = newBlock;
+                            }
+                            break;
+
+                        case FlickCheck.DOWN_FLICK:
+                            int y = posy;
+                            while (check(block, posx, y)) { y++; }
+                            if (y > 0) posy = y - 1;
+                            break;
+                    }
+                }
+            };
         }
 
         public void initGame() {
@@ -96,8 +142,8 @@ public class Top extends AppCompatActivity {
             for (int y = 0; y < h; y ++) {
                 for (int x = 0; x < w; x ++) {
                     if (matrix[y][x] != 0) {
-                        int px = (x + offsetx) * 45;
-                        int py = (y + offsety) * 45;
+                        int px = (x + offsetx) * 50;
+                        int py = (y + offsety) * 50;
                         rect.setBounds(px, py, px + 40, py + 40);
                         rect.draw(canvas);
                     }
@@ -174,11 +220,11 @@ public class Top extends AppCompatActivity {
         @Override
         protected void onDraw(Canvas canvas) {
             ShapeDrawable rect = new ShapeDrawable(new RectShape());
-            rect.setBounds(0, 0, 1080, 1920);
+            rect.setBounds(0, 0, 1300, 1580);
             rect.getPaint().setColor(0xFF000000);
             rect.draw(canvas);
             canvas.translate(10, 10);
-            rect.setBounds(0, 0, 1080, 1910);
+            rect.setBounds(0, 0, 1200, 1530);
             rect.getPaint().setColor(0xFFFFFFFF);
             rect.draw(canvas);
 
@@ -196,6 +242,7 @@ public class Top extends AppCompatActivity {
             }
             return rotated;
         }
+
 
         @Override
         public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -220,7 +267,6 @@ public class Top extends AppCompatActivity {
                     int y = posy;
                     while (check(block, posx, y)) { y++; }
                     if (y > 0) posy = y - 1;
-
                     break;
             }
             mHandler.sendEmptyMessage(INVALIDATE);
@@ -271,20 +317,22 @@ public class Top extends AppCompatActivity {
         };
     }
 
+
     FieldView mFieldView;
-
-    private void setFieldView() {
-        if (mFieldView == null) {
-            mFieldView = new FieldView(getApplication());
-            setContentView(mFieldView);
-        }
-    }
-
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_top);
+
     }
+
+    private void setFieldView() {
+        if (mFieldView == null) {
+            mFieldView = new FieldView(getApplication());
+             setContentView(mFieldView);
+        }
+    }
+
 
     @Override
     protected void onResume() {
