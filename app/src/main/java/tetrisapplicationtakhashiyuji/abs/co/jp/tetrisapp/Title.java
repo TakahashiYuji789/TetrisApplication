@@ -17,6 +17,5 @@ public class Title extends AppCompatActivity {
     public void onPlayButton(View view) {
         Intent intent = new Intent(this, Top.class);
         startActivity(intent);
-
     }
 }

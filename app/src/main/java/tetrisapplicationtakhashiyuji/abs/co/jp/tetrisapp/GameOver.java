@@ -9,7 +9,7 @@ public class GameOver extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.title);
+        setContentView(R.layout.gameover);
     }
 
 

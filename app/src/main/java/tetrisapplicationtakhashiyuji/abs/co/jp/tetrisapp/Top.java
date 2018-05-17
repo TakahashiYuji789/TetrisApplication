@@ -4,6 +4,7 @@ import java.util.Random;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
@@ -28,41 +29,41 @@ public class Top extends AppCompatActivity {
     FieldView mainSurfaceView;
     private SurfaceView surfaceView;
 
-    private class FieldView extends SurfaceView  {
-
+    private class FieldView extends SurfaceView {
+        public boolean stop;
         Random mRand = new Random(System.currentTimeMillis());
         View flickView = getWindow().getDecorView(); // Activity画面
         float adjustX = 150.0f;
         float adjustY = 150.0f;
         int[][][] blocks = {
                 {
-                        {1,1},
-                        {0,1},
-                        {0,1}
+                        {1, 1},
+                        {0, 1},
+                        {0, 1}
                 },
                 {
-                        {1,1},
-                        {1,0},
-                        {1,0}
+                        {1, 1},
+                        {1, 0},
+                        {1, 0}
                 },
                 {
-                        {1,1},
-                        {1,1}
+                        {1, 1},
+                        {1, 1}
                 },
                 {
-                        {1,0},
-                        {1,1},
-                        {1,0}
+                        {1, 0},
+                        {1, 1},
+                        {1, 0}
                 },
                 {
-                        {1,0},
-                        {1,1},
-                        {0,1}
+                        {1, 0},
+                        {1, 1},
+                        {0, 1}
                 },
                 {
-                        {0,1},
-                        {1,1},
-                        {1,0}
+                        {0, 1},
+                        {1, 1},
+                        {1, 0}
                 },
                 {
                         {1},
@@ -80,9 +81,10 @@ public class Top extends AppCompatActivity {
 
         int[][] block = blocks[mRand.nextInt(blocks.length)];
         int posx, posy;
-        int mapWidth  = 10*2+3;
-        int mapHeight = 15*2+1;
+        int mapWidth = 10 * 2 + 4;
+        int mapHeight = 15 * 2 +4;
         int[][] map = new int[mapHeight][];
+        Intent intent;
 
         public FieldView(Context context) {
             super(context);
@@ -90,8 +92,8 @@ public class Top extends AppCompatActivity {
             setFocusable(true);
             setFocusableInTouchMode(true);
             requestFocus();
+            intent = new Intent(context, GameOver.class);
             new FlickCheck(flickView, adjustX, adjustY) {
-
                 @Override
                 public void getFlick(int flickData) {
                     switch (flickData) {
@@ -116,13 +118,17 @@ public class Top extends AppCompatActivity {
 
                         case FlickCheck.DOWN_FLICK:
                             int y = posy;
-                            while (check(block, posx, y)) { y++; }
+                            while (check(block, posx, y)) {
+                                y++;
+                            }
                             if (y > 0) posy = y - 1;
                             break;
                     }
                 }
             };
         }
+
+
 
         public void initGame() {
             for (int y = 0; y < mapHeight; y++) {
@@ -142,8 +148,8 @@ public class Top extends AppCompatActivity {
             for (int y = 0; y < h; y ++) {
                 for (int x = 0; x < w; x ++) {
                     if (matrix[y][x] != 0) {
-                        int px = (x + offsetx) * 50;
-                        int py = (y + offsety) * 50;
+                        int px = (x + offsetx) * 45;
+                        int py = (y + offsety) * 45;
                         rect.setBounds(px, py, px + 40, py + 40);
                         rect.draw(canvas);
                     }
@@ -158,6 +164,7 @@ public class Top extends AppCompatActivity {
                     mapWidth < offsetx + block[0].length) {
                 return false;
             }
+
             for (int y = 0; y < block.length; y ++) {
                 for (int x = 0; x < block[y].length; x ++) {
                     if (block[y][x] != 0 && map[y + offsety][x + offsetx] != 0) {
@@ -174,6 +181,7 @@ public class Top extends AppCompatActivity {
                     if (block[y][x] != 0) {
                         map[offsety + y][offsetx + x] = block[y][x];
                     }
+                if(map[0][0]!=0)         startActivity(intent);
                 }
             }
         }
@@ -188,7 +196,6 @@ public class Top extends AppCompatActivity {
                         break;
                     }
                 }
-
                 if (full) map[y] = null;
             }
 
@@ -200,7 +207,7 @@ public class Top extends AppCompatActivity {
                     continue;
                 } else {
                     newMap[y2--] = map[y];
-                }
+                  }
             }
 
             // 消えた行数分新しい行を追加する
@@ -239,7 +246,7 @@ public class Top extends AppCompatActivity {
                 for (int y = 0; y < block.length; y ++) {
                     rotated[x][block.length - y - 1] = block[y][x];
                 }
-            }
+        }
             return rotated;
         }
 
@@ -279,6 +286,7 @@ public class Top extends AppCompatActivity {
         }
 
         public void stopAnime() {
+            stop=true;
             mHandler.removeMessages(INVALIDATE);
             mHandler.removeMessages(DROPBLOCK);
         }
@@ -306,7 +314,6 @@ public class Top extends AppCompatActivity {
                             posx = 0; posy = 0;
                             block = blocks[mRand.nextInt(blocks.length)];
                         }
-
                         invalidate();
                         Message massage = new Message();
                         massage.what = DROPBLOCK;
@@ -325,7 +332,6 @@ public class Top extends AppCompatActivity {
         setContentView(R.layout.activity_top);
 
     }
-
     private void setFieldView() {
         if (mFieldView == null) {
             mFieldView = new FieldView(getApplication());
@@ -347,7 +353,7 @@ public class Top extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mFieldView.stopAnime();
+          mFieldView.stopAnime();
     }
 
     @Override
